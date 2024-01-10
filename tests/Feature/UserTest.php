@@ -164,4 +164,51 @@ class UserTest extends TestCase
                 ]
             ]);
     }
+
+    public function testUpdateSuccess()
+    {
+        $this->seed([UserSeeder::class]);
+        $oldUser = User::where("username", "test")->first();
+
+        $this->patch(
+            "/api/users/current",
+            [
+                "name" => "new",
+                "password" => "new"
+            ],
+            [
+                "Authorization" => "test"
+            ]
+        )
+            ->assertStatus(200);
+
+        $newUser = User::where("name", "new")->first();
+
+        self::assertNotEquals($newUser->name, $oldUser->name);
+        self::assertNotEquals($newUser->password, $oldUser->password);
+    }
+
+    public function testUpdateFailNameTooLong()
+    {
+        $this->seed([UserSeeder::class]);
+
+        $this->patch(
+            "/api/users/current",
+            [
+                "name" => "7AZOjQ4OPBW9BenaGTckz6nxZvZ7AZOjQ4OPBW9BenaGTckz6nxZvZ7AZOjQ4OPBW9BenaGTckz6nxZvZ7AZOjQ4OPBW9BenaGTckz6nxZvZ7AZOjQ4OPBW9BenaGTckz6nxZvZ7AZOjQ4OPBW9BenaGTckz6nxZvZ",
+                "password" => "new"
+            ],
+            [
+                "Authorization" => "test"
+            ]
+        )
+            ->assertStatus(400)
+            ->assertJson([
+                "errors" => [
+                    "name" => [
+                        "The name field must not be greater than 100 characters."
+                    ]
+                ]
+            ]);
+    }
 }
