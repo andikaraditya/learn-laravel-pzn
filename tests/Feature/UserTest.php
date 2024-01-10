@@ -86,7 +86,7 @@ class UserTest extends TestCase
                 ]
             ]);
 
-        $user = User::where("username","test")->first();
+        $user = User::where("username", "test")->first();
         assertNotNull($user->token);
     }
     public function testLoginFail()
@@ -117,6 +117,49 @@ class UserTest extends TestCase
                 "errors" => [
                     "message" => [
                         "username or password is incorrect"
+                    ]
+                ]
+            ]);
+    }
+
+    public function testGetSuccess()
+    {
+        $this->seed([UserSeeder::class]);
+
+        $this->get("/api/users/current", [
+            "Authorization" => "test"
+        ])
+            ->assertStatus(200)
+            ->assertJson([
+                "data" => [
+                    "username" => "test",
+                    "name" => "test",
+                ]
+            ]);
+    }
+
+    public function testGetFail()
+    {
+        $this->get("/api/users/current")
+            ->assertStatus(401)
+            ->assertJson([
+                "errors" => [
+                    "message" => [
+                        "unauthorized"
+                    ]
+                ]
+            ]);
+    }
+    public function testGetFailInvalidToken()
+    {
+        $this->get("/api/users/current", [
+            "Authorization" => "fail"
+        ])
+            ->assertStatus(401)
+            ->assertJson([
+                "errors" => [
+                    "message" => [
+                        "unauthorized"
                     ]
                 ]
             ]);
