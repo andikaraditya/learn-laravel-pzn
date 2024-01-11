@@ -74,15 +74,26 @@ class UserController extends Controller
         $data = $request->validated();
         $user = Auth::user();
 
-        if(isset($data["name"])){
+        if (isset($data["name"])) {
             $user->name = $data["name"];
         }
-        if(isset($data["password"])){
+        if (isset($data["password"])) {
             $user->password = Hash::make($data["password"]);
         }
 
         $user->save();
 
         return (new UserResource($user))->response()->setStatusCode(200);
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        $user->token = null;
+        $user->save();
+
+        return response()->json([
+            "data" => true
+        ])->setStatusCode(200);
     }
 }
