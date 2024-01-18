@@ -260,9 +260,55 @@ class AddressTest extends TestCase
         $address = Address::query()->limit(1)->first();
 
         $this->delete(
-            "/api/contacts/" . $contact->id . "/addresses/" . ($address->id +1),
+            "/api/contacts/" . $contact->id . "/addresses/" . ($address->id + 1),
             [
             ],
+            [
+                "Authorization" => "test"
+            ]
+        )
+            ->assertStatus(404)
+            ->assertJson([
+                "errors" => [
+                    "message" => ["not found"]
+                ]
+            ]);
+    }
+
+    public function testListSuccess()
+    {
+        $this->seed([UserSeeder::class, ContactSeeder::class, AddressSeeder::class]);
+
+        $contact = Contact::query()->limit(1)->first();
+
+        $this->get(
+            "/api/contacts/" . $contact->id . "/addresses",
+            [
+                "Authorization" => "test"
+            ]
+        )
+            ->assertStatus(200)
+            ->assertJson([
+                "data" => [
+                    [
+                        "street" => "test",
+                        "city" => "test",
+                        "province" => "test",
+                        "country" => "test",
+                        "postal_code" => "12345",
+                    ]
+                ]
+            ]);
+    }
+
+    public function testListContactNotFound()
+    {
+        $this->seed([UserSeeder::class, ContactSeeder::class, AddressSeeder::class]);
+
+        $contact = Contact::query()->limit(1)->first();
+
+        $this->get(
+            "/api/contacts/" . ($contact->id + 1) . "/addresses",
             [
                 "Authorization" => "test"
             ]

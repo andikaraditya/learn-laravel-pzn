@@ -98,4 +98,14 @@ class AddressController extends Controller
             "data" => true
             ])->setStatusCode(200);
     }
+
+    public function list(int $idContact)
+    {
+        $user = Auth::user();
+        $contact = $this->getContact($user, $idContact);
+
+        $addresses = Address::where("contact_id", $contact->id)->get();
+
+        return (AddressResource::collection($addresses))->response()->setStatusCode(200);
+    }
 }
